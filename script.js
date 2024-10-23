@@ -1,28 +1,29 @@
 const editor = document.getElementById('editor');
 const commentList = document.getElementById('commentList');
 const wordCountDisplay = document.getElementById('wordCountDisplay');
-let versionHistory = [];
+let findReplaceBox = document.getElementById('findReplaceBox');
 
-// Load document from backend on page load
-window.addEventListener('load', async () => {
-    const response = await fetch('http://localhost:3000/document');
-    const data = await response.json();
-    editor.innerHTML = data.content || '';
+// Load document content
+window.addEventListener('load', () => {
+    editor.innerHTML = localStorage.getItem('document') || '';
 });
 
-// Autosave to backend on input
-editor.addEventListener('input', async () => {
+// Autosave document on input
+editor.addEventListener('input', () => {
     const content = editor.innerHTML;
     localStorage.setItem('document', content);
-    await fetch('http://localhost:3000/document', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content }),
-    });
     updateWordCount();
 });
+
+// Change font family or size
+function changeFont(type) {
+    const value = document.getElementById(type).value;
+    if (type === 'fontFamily') {
+        document.execCommand('fontName', false, value);
+    } else {
+        document.execCommand('fontSize', false, value);
+    }
+}
 
 // Formatting functions
 function formatDoc(command) {
@@ -34,31 +35,25 @@ function clearFormatting() {
     document.execCommand('removeFormat', false, null);
 }
 
+// Insert horizontal line
+function insertHorizontalLine() {
+    const hr = document.createElement('hr');
+    editor.appendChild(hr);
+}
+
 // Change text color
 function changeTextColor(color) {
     document.execCommand('foreColor', false, color);
 }
 
-// Change background color
-function changeBGColor(color) {
-    document.execCommand('hiliteColor', false, color);
+// Insert page break
+function insertPageBreak() {
+    const br = document.createElement('div');
+    br.style.pageBreakAfter = 'always';
+    editor.appendChild(br);
 }
 
-// Download document as HTML file
-function downloadDocument() {
-    const content = editor.innerHTML;
-    const blob = new Blob([content], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'document.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-// Image uploader
+// Image handling
 function insertImage() {
     document.getElementById("imageUploader").click();
 }
@@ -69,38 +64,55 @@ function uploadImage(event) {
     reader.onload = function (e) {
         const img = document.createElement('img');
         img.src = e.target.result;
-        img.style.maxWidth = '100%';
-        img.style.display = 'block';
-        img.style.cursor = 'nwse-resize'; // Change cursor for resizing
-        img.contentEditable = false; // Prevent editing the image
+        img.className = 'resizable';
+        img.contentEditable = false;  // Prevent editing the image
+        img.addEventListener('click', function () {
+            this.remove(); // Delete image on click
+        });
+        makeImageResizable(img);
         editor.appendChild(img);
-        // Resize functionality on image
-        img.addEventListener('mousedown', initResize);
     };
     reader.readAsDataURL(file);
 }
 
-// Insert a table
-function insertTable() {
-    const table = document.createElement('table');
-    table.style.width = '100%';
-    table.border = '1';
-    for (let i = 0; i < 3; i++) {
-        const row = table.insertRow();
-        for (let j = 0; j < 3; j++) {
-            const cell = row.insertCell();
-            cell.contentEditable = true;
-            cell.textContent = 'Cell ' + (i + 1) + ', ' + (j + 1);
+// Make image resizable
+function makeImageResizable(img) {
+    let isResizing = false;
+    let originalWidth = img.clientWidth;
+    let originalHeight = img.clientHeight;
+
+    img.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        originalWidth = img.clientWidth;
+        originalHeight = img.clientHeight;
+
+        window.addEventListener('mousemove', resize);
+        window.addEventListener('mouseup', () => {
+            isResizing = false;
+            window.removeEventListener('mousemove', resize);
+        });
+    });
+
+    function resize(e) {
+        if (isResizing) {
+            const newWidth = originalWidth + (e.movementX);
+            const newHeight = originalHeight + (e.movementY);
+            img.style.width = `${newWidth}px`;
+            img.style.height = `${newHeight}px`;
         }
     }
-    editor.appendChild(table);
 }
 
-// Function to insert a block quote
-function insertBlockQuote() {
-    const quote = document.createElement('blockquote');
-    quote.textContent = prompt("Enter your quote:");
-    editor.appendChild(quote);
+// Download document as HTML file
+function downloadDocument() {
+    const content = editor.innerHTML;
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'document.html';
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 // Export to PDF
@@ -111,35 +123,57 @@ function exportToPDF() {
         .save('document.pdf');
 }
 
-// Insert a link
+// Export to DOCX
+function exportToDOCX() {
+    const element = document.getElementById('editor');
+    const exportContent = new Blob([element.innerHTML], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(exportContent);
+    link.download = 'document.docx';
+    link.click();
+}
+
+// Insert table
+function insertTable() {
+    const rows = parseInt(prompt("Enter number of rows:", "3"));
+    const cols = parseInt(prompt("Enter number of columns:", "3"));
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.border = '1';
+    for (let i = 0; i < rows; i++) {
+        const row = table.insertRow();
+        for (let j = 0; j < cols; j++) {
+            const cell = row.insertCell();
+            cell.contentEditable = true;
+            cell.textContent = 'Cell ' + (i + 1) + ', ' + (j + 1);
+        }
+    }
+    editor.appendChild(table);
+}
+
+// Create link
 function createLink() {
     const url = prompt("Enter the link URL:", "http://");
     if (url) {
-        document.execCommand('createLink', false, url);
+        const selectedText = window.getSelection().toString();
+        const a = document.createElement('a');
+        a.href = url;
+        a.innerText = selectedText || url;
+        a.target = '_blank';
+        document.execCommand("insertHTML", false, a.outerHTML);
     }
 }
 
-// Toggle comment box visibility
-function toggleCommentBox() {
-    const commentBox = document.getElementById("commentBox");
-    commentBox.style.display = commentBox.style.display === "none" ? "block" : "none";
-}
-
-// Submit comment to comment list
-function submitComment() {
-    const commentText = document.getElementById("commentText").value;
-    if (commentText) {
-        const li = document.createElement("li");
-        li.textContent = commentText;
-        commentList.appendChild(li);
-        document.getElementById("commentText").value = ""; // Clear input
-        toggleCommentBox(); // Hide comment box
-    } else {
-        alert("Please enter a comment.");
+// Reset Document
+function resetDocument() {
+    if (confirm("Are you sure you want to reset the document?")) {
+        editor.innerHTML = "";
+        localStorage.removeItem('document');
+        updateWordCount();
     }
 }
 
-// Update word count display
+// Update word count
 function updateWordCount() {
     const text = editor.innerText || "";
     const words = text.match(/\w+/g);
@@ -152,36 +186,28 @@ function showWordCount() {
     updateWordCount();
 }
 
-// Undo function
+// Undo functionality
 function undo() {
     document.execCommand('undo', false, null);
 }
 
-// Redo function
+// Redo functionality
 function redo() {
     document.execCommand('redo', false, null);
 }
 
-// Function for image resizing
-function initResize(e) {
-    const img = e.target;
-    window.addEventListener('mousemove', startResizing);
-    window.addEventListener('mouseup', stopResizing);
+// Find and Replace
+function findAndReplace() {
+    findReplaceBox.style.display = 'block';
+}
 
-    let originalWidth = img.clientWidth;
-    let originalHeight = img.clientHeight;
-    let originalMouseX = e.clientX;
-    let originalMouseY = e.clientY;
+function closeFindReplace() {
+    findReplaceBox.style.display = 'none';
+}
 
-    function startResizing(e) {
-        const newWidth = originalWidth + (e.clientX - originalMouseX);
-        const newHeight = originalHeight + (e.clientY - originalMouseY);
-        img.style.width = `${newWidth}px`;
-        img.style.height = `${newHeight}px`;
-    }
-
-    function stopResizing() {
-        window.removeEventListener('mousemove', startResizing);
-        window.removeEventListener('mouseup', stopResizing);
-    }
+function replaceText() {
+    const findText = document.getElementById('findText').value;
+    const replaceText = document.getElementById('replaceText').value;
+    const innerHTML = editor.innerHTML.replace(new RegExp(findText, 'g'), replaceText);
+    editor.innerHTML = innerHTML;
 }
