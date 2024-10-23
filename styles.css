@@ -1,18 +1,30 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0;
     background-color: #f4f4f4;
 }
 
-.app {
-    width: 100%;
-    max-width: 800px;
-    margin: auto;
-    background: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 15px;
+header {
+    background-color: #ffffff;
+    padding: 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+header h1 {
+    font-size: 24px;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.subtitle {
+    color: #888888;
+    font-size: 16px;
 }
 
 .toolbar {
@@ -20,22 +32,19 @@ body {
     flex-wrap: wrap;
     background: #ececec;
     padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
 }
 
-.group {
-    margin-right: 20px;
-    margin-bottom: 5px;
-}
-
-.toolbar select, .toolbar button, .toolbar input {
+.toolbar select,
+.toolbar button,
+.toolbar input {
     margin-right: 5px;
     border: none;
     border-radius: 4px;
-    padding: 5px 8px;
+    padding: 8px 10px;
     cursor: pointer;
     transition: background 0.2s;
+    font-size: 14px;
 }
 
 .toolbar button {
@@ -47,24 +56,28 @@ body {
     background-color: #45a049;
 }
 
-.editor-container {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    min-height: 400px;
-    overflow-y: auto;
-}
-
 #editor {
-    width: 100%;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #ffffff;
+    border-radius: 6px;
     min-height: 400px;
-    font-size: 16px;
+    max-height: 600px;
+    overflow-y: auto;
     outline: none;
+    font-size: 16px;
 }
 
-#findReplaceBox {
+#wordCountDisplay {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+#commentsSection {
     margin-top: 20px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
 }
 
 #commentList {
@@ -77,14 +90,4 @@ body {
     margin: 5px 0;
     padding: 5px;
     border-radius: 3px;
-}
-
-#wordCountDisplay {
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-img.resizable {
-    max-width: 100%;
-    cursor: nwse-resize; /* Resize cursor */
 }
