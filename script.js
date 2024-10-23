@@ -1,4 +1,7 @@
 const editor = document.getElementById('editor');
+const commentList = document.getElementById('commentList');
+const wordCountDisplay = document.getElementById('wordCountDisplay');
+let versionHistory = [];
 
 // Load document from backend on page load
 window.addEventListener('load', async () => {
@@ -18,6 +21,7 @@ editor.addEventListener('input', async () => {
         },
         body: JSON.stringify({ content }),
     });
+    updateWordCount();
 });
 
 // Formatting functions
@@ -67,12 +71,16 @@ function uploadImage(event) {
         img.src = e.target.result;
         img.style.maxWidth = '100%';
         img.style.display = 'block';
+        img.style.cursor = 'nwse-resize'; // Change cursor for resizing
+        img.contentEditable = false; // Prevent editing the image
         editor.appendChild(img);
+        // Resize functionality on image
+        img.addEventListener('mousedown', initResize);
     };
     reader.readAsDataURL(file);
 }
 
-// Insert table functionality
+// Insert a table
 function insertTable() {
     const table = document.createElement('table');
     table.style.width = '100%';
@@ -86,6 +94,13 @@ function insertTable() {
         }
     }
     editor.appendChild(table);
+}
+
+// Function to insert a block quote
+function insertBlockQuote() {
+    const quote = document.createElement('blockquote');
+    quote.textContent = prompt("Enter your quote:");
+    editor.appendChild(quote);
 }
 
 // Export to PDF
@@ -116,7 +131,7 @@ function submitComment() {
     if (commentText) {
         const li = document.createElement("li");
         li.textContent = commentText;
-        document.getElementById("commentList").appendChild(li);
+        commentList.appendChild(li);
         document.getElementById("commentText").value = ""; // Clear input
         toggleCommentBox(); // Hide comment box
     } else {
@@ -124,22 +139,49 @@ function submitComment() {
     }
 }
 
-// Example: Add version history feature (optional)
-let versionHistory = [];
+// Update word count display
+function updateWordCount() {
+    const text = editor.innerText || "";
+    const words = text.match(/\w+/g);
+    const count = words ? words.length : 0;
+    wordCountDisplay.textContent = `Word Count: ${count}`;
+}
 
-editor.addEventListener('input', () => {
-    versionHistory.push(editor.innerHTML);
-});
+// Show the current word count
+function showWordCount() {
+    updateWordCount();
+}
 
-function showVersionHistory() {
-    const historyList = document.createElement('ul');
-    versionHistory.forEach((version, index) => {
-        const li = document.createElement('li');
-        li.textContent = `Version ${index + 1}`;
-        li.onclick = () => {
-            editor.innerHTML = version;
-        };
-        historyList.appendChild(li);
-    });
-    document.body.appendChild(historyList);
+// Undo function
+function undo() {
+    document.execCommand('undo', false, null);
+}
+
+// Redo function
+function redo() {
+    document.execCommand('redo', false, null);
+}
+
+// Function for image resizing
+function initResize(e) {
+    const img = e.target;
+    window.addEventListener('mousemove', startResizing);
+    window.addEventListener('mouseup', stopResizing);
+
+    let originalWidth = img.clientWidth;
+    let originalHeight = img.clientHeight;
+    let originalMouseX = e.clientX;
+    let originalMouseY = e.clientY;
+
+    function startResizing(e) {
+        const newWidth = originalWidth + (e.clientX - originalMouseX);
+        const newHeight = originalHeight + (e.clientY - originalMouseY);
+        img.style.width = `${newWidth}px`;
+        img.style.height = `${newHeight}px`;
+    }
+
+    function stopResizing() {
+        window.removeEventListener('mousemove', startResizing);
+        window.removeEventListener('mouseup', stopResizing);
+    }
 }
