@@ -1,94 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <title>Nexus Document Editor</title>
+    <title>Google Docs-Like Editor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 </head>
-
 <body>
-    <div class="app">
-        <div class="toolbar">
-            <div class="group">
-                <h4>Formatting</h4>
-                <select id="fontFamily" onchange="changeFont('fontFamily')">
-                    <option value="Arial">Arial</option>
-                    <option value="Courier New">Courier New</option>
-                    <option value="Georgia">Georgia</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                    <option value="Verdana">Verdana</option>
-                </select>
-                <select id="fontSize" onchange="changeFont('fontSize')">
-                    <option value="3">Normal</option>
-                    <option value="1">Small</option>
-                    <option value="2">Medium</option>
-                    <option value="4">Large</option>
-                    <option value="5">Extra Large</option>
-                </select>
-                <button onclick="formatDoc('bold')" title="Bold"><b>B</b></button>
-                <button onclick="formatDoc('italic')" title="Italic"><i>I</i></button>
-                <button onclick="formatDoc('underline')" title="Underline"><u>U</u></button>
-                <button onclick="clearFormatting()" title="Clear Formatting">A</button>
-                <input type="color" id="textColor" title="Text Color" onchange="changeTextColor(this.value)">
-                <button onclick="insertHorizontalLine()" title="Insert Horizontal Line">Line</button>
-            </div>
-            <div class="group">
-                <h4>Insert</h4>
-                <button onclick="insertImage()" title="Insert Image">Image</button>
-                <button onclick="insertTable()" title="Insert Table">Table</button>
-                <button onclick="createLink()" title="Insert Link">Link</button>
-                <button onclick="insertBlockQuote()" title="Insert Block Quote">Quote</button>
-                <button onclick="insertPageBreak()" title="Insert Page Break">Page Break</button>
-            </div>
-            <div class="group">
-                <h4>File</h4>
-                <button onclick="downloadDocument()" title="Download Document">Download</button>
-                <button onclick="exportToPDF()" title="Export as PDF">PDF</button>
-                <button onclick="exportToDOCX()" title="Export as DOCX">DOCX</button>
-                <button onclick="resetDocument()" title="Reset Document">Reset</button>
-            </div>
-            <div class="group">
-                <h4>Text Styles</h4>
-                <button onclick="formatDoc('insertUnorderedList')" title="Bullet List">•</button>
-                <button onclick="formatDoc('insertOrderedList')" title="Numbered List">1.</button>
-                <button onclick="formatDoc('indent')" title="Indent">Indent</button>
-                <button onclick="formatDoc('outdent')" title="Outdent">Outdent</button>
-            </div>
-            <div class="group">
-                <h4>Text Alignment</h4>
-                <button onclick="formatDoc('justifyLeft')" title="Align Left">Left</button>
-                <button onclick="formatDoc('justifyCenter')" title="Center">Center</button>
-                <button onclick="formatDoc('justifyRight')" title="Align Right">Right</button>
-                <button onclick="formatDoc('justifyFull')" title="Justify">Justify</button>
-            </div>
-            <div class="group">
-                <h4>Actions</h4>
-                <button onclick="undo()" title="Undo">Undo</button>
-                <button onclick="redo()" title="Redo">Redo</button>
-                <button onclick="showComments()" title="Comments">Comments</button>
-                <button onclick="findAndReplace()" title="Find & Replace">Find & Replace</button>
-            </div>
-        </div>
-        <div class="editor-container" id="editor" contenteditable="true" placeholder="Start typing your document..."></div>
-        
-        <!-- Comments Section -->
+    <header>
+        <h1>Document Title <span class="subtitle">(Untitled Document)</span></h1>
+    </header>
+    <div class="toolbar">
+        <select id="fontFamily" onchange="changeFont('fontFamily')">
+            <option value="">Font</option>
+            <option value="Arial">Arial</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Verdana">Verdana</option>
+        </select>
+        <select id="fontSize" onchange="changeFont('fontSize')">
+            <option value="3">Normal</option>
+            <option value="1">Small</option>
+            <option value="2">Medium</option>
+            <option value="4">Large</option>
+            <option value="5">Extra Large</option>
+        </select>
+        <button onclick="formatDoc('bold')"><b>B</b></button>
+        <button onclick="formatDoc('italic')"><i>I</i></button>
+        <button onclick="formatDoc('underline')"><u>U</u></button>
+        <button onclick="formatDoc('strikeThrough')">S</button>
+        <input type="color" id="textColor" onchange="changeTextColor(this.value)">
+        <button onclick="formatDoc('insertUnorderedList')">• List</button>
+        <button onclick="formatDoc('insertOrderedList')">1. List</button>
+        <button onclick="formatDoc('justifyLeft')">Left</button>
+        <button onclick="formatDoc('justifyCenter')">Center</button>
+        <button onclick="formatDoc('justifyRight')">Right</button>
+        <button onclick="insertLink()">Insert Link</button>
+        <button onclick="insertImage()">Insert Image</button>
+        <button onclick="insertTable()">Insert Table</button>
+        <button onclick="insertBlockQuote()">Insert Quote</button>
+        <button onclick="downloadDocument()">Download</button>
+        <button onclick="exportToPDF()">Export to PDF</button>
+        <button onclick="exportToDOCX()">Export to DOCX</button>
+    </div>
+    <div id="editor" contenteditable="true" placeholder="Start typing your document..."></div>
+    <div id="wordCountDisplay"></div>
+    <div id="commentsSection">
         <h4>Comments</h4>
         <ul id="commentList"></ul>
-        
-        <!-- Word Count Display -->
-        <div id="wordCountDisplay"></div>
-        
-        <!-- Find and Replace Box -->
-        <div id="findReplaceBox" style="display:none;">
-            <h4>Find and Replace</h4>
-            <input type="text" id="findText" placeholder="Find text">
-            <input type="text" id="replaceText" placeholder="Replace with">
-            <button onclick="replaceText()">Replace</button>
-            <button onclick="closeFindReplace()">Close</button>
-        </div>
     </div>
     <input type="file" id="imageUploader" accept="image/*" style="display:none" onchange="uploadImage(event)">
     <script src="script.js"></script>
