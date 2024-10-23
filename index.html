@@ -1,15 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <title>Nexus Document Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 </head>
+
 <body>
-    <div class="editor-container">
-        <textarea id="editor" placeholder="Start typing your document..."></textarea>
+    <div class="app">
+        <div class="toolbar">
+            <div class="group">
+                <h4>Formatting</h4>
+                <button onclick="formatDoc('bold')"><b>B</b></button>
+                <button onclick="formatDoc('italic')"><i>I</i></button>
+                <button onclick="formatDoc('underline')"><u>U</u></button>
+                <button onclick="clearFormatting()">Clear Formatting</button>
+                <div>
+                    <label for="textColor">Text Color: </label>
+                    <input type="color" id="textColor" onchange="changeTextColor(this.value)" value="#000000">
+                </div>
+                <div>
+                    <label for="bgColor">Background Color: </label>
+                    <input type="color" id="bgColor" onchange="changeBGColor(this.value)" value="#ffffff">
+                </div>
+            </div>
+            <div class="group">
+                <h4>Insert</h4>
+                <button onclick="insertImage()">Insert Image</button>
+                <button onclick="insertTable()">Insert Table</button>
+                <button onclick="createLink()">Insert Link</button>
+            </div>
+            <div class="group">
+                <h4>File</h4>
+                <button onclick="downloadDocument()">Download</button>
+                <button onclick="exportToPDF()">Export as PDF</button>
+            </div>
+        </div>
+        <div class="editor-container">
+            <div contenteditable="true" id="editor" placeholder="Start typing your document..."></div>
+        </div>
+        <button onclick="toggleCommentBox()">Add Comment</button>
+        <div id="commentBox" style="display:none;">
+            <textarea id="commentText" placeholder="Add your comment here..."></textarea>
+            <button onclick="submitComment()">Submit Comment</button>
+        </div>
+        <h4>Comments</h4>
+        <ul id="commentList"></ul>
     </div>
+    <input type="file" id="imageUploader" accept="image/*" style="display:none" onchange="uploadImage(event)">
     <script src="script.js"></script>
 </body>
+
 </html>
