@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,35 +7,56 @@
     <title>Nexus Document Editor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 </head>
-
 <body>
     <div class="app">
         <div class="toolbar">
             <div class="group">
                 <h4>Formatting</h4>
-                <button onclick="formatDoc('bold')"><b>B</b></button>
-                <button onclick="formatDoc('italic')"><i>I</i></button>
-                <button onclick="formatDoc('underline')"><u>U</u></button>
-                <button onclick="clearFormatting()">Clear Formatting</button>
+                <button onclick="formatDoc('bold')" title="Bold"><b>B</b></button>
+                <button onclick="formatDoc('italic')" title="Italic"><i>I</i></button>
+                <button onclick="formatDoc('underline')" title="Underline"><u>U</u></button>
+                <button onclick="clearFormatting()" title="Clear Formatting">A</button>
                 <div>
-                    <label for="textColor">Text Color: </label>
+                    <label for="textColor" title="Text Color">Text Color: </label>
                     <input type="color" id="textColor" onchange="changeTextColor(this.value)" value="#000000">
                 </div>
                 <div>
-                    <label for="bgColor">Background Color: </label>
+                    <label for="bgColor" title="Background Color">Background Color: </label>
                     <input type="color" id="bgColor" onchange="changeBGColor(this.value)" value="#ffffff">
                 </div>
             </div>
             <div class="group">
                 <h4>Insert</h4>
-                <button onclick="insertImage()">Insert Image</button>
-                <button onclick="insertTable()">Insert Table</button>
-                <button onclick="createLink()">Insert Link</button>
+                <button onclick="insertImage()" title="Insert Image">Image</button>
+                <button onclick="insertTable()" title="Insert Table">Table</button>
+                <button onclick="createLink()" title="Insert Link">Link</button>
+                <button onclick="insertBlockQuote()" title="Insert Block Quote">Quote</button>
+                <input type="file" id="imageUploader" accept="image/*" style="display:none" onchange="uploadImage(event)">
             </div>
             <div class="group">
                 <h4>File</h4>
-                <button onclick="downloadDocument()">Download</button>
-                <button onclick="exportToPDF()">Export as PDF</button>
+                <button onclick="downloadDocument()" title="Download Document">Download</button>
+                <button onclick="exportToPDF()" title="Export as PDF">PDF</button>
+                <button onclick="showWordCount()" title="Show Word Count">Word Count</button>
+            </div>
+            <div class="group">
+                <h4>Lists</h4>
+                <button onclick="formatDoc('insertUnorderedList')" title="Bullet List">•</button>
+                <button onclick="formatDoc('insertOrderedList')" title="Numbered List">1.</button>
+                <button onclick="formatDoc('indent')" title="Indent">Indent</button>
+                <button onclick="formatDoc('outdent')" title="Outdent">Outdent</button>
+            </div>
+            <div class="group">
+                <h4>Text Alignment</h4>
+                <button onclick="formatDoc('justifyLeft')" title="Align Left">Left</button>
+                <button onclick="formatDoc('justifyCenter')" title="Center">Center</button>
+                <button onclick="formatDoc('justifyRight')" title="Align Right">Right</button>
+                <button onclick="formatDoc('justifyFull')" title="Justify">Justify</button>
+            </div>
+            <div class="group">
+                <h4>Actions</h4>
+                <button onclick="undo()" title="Undo">Undo</button>
+                <button onclick="redo()" title="Redo">Redo</button>
             </div>
         </div>
         <div class="editor-container">
@@ -49,9 +69,8 @@
         </div>
         <h4>Comments</h4>
         <ul id="commentList"></ul>
+        <div id="wordCountDisplay"></div>
     </div>
-    <input type="file" id="imageUploader" accept="image/*" style="display:none" onchange="uploadImage(event)">
     <script src="script.js"></script>
 </body>
-
 </html>
